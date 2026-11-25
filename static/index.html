@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sauda — Anticipatory Shopping Agent | Techfest AgentX 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #7c3aed, #2563eb); padding: 18px 28px; }
+  header h1 { font-size: 30px; letter-spacing: .5px; }
+  header h1 span { color: #fbbf24; }
+  header p { color: #dbeafe; font-size: 14px; margin-top: 4px; }
+  .sim { display: inline-block; background: #f59e0b; color: #1e293b; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; vertical-align: middle; margin-left: 8px; }
+  main { display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px; padding: 18px 28px; max-width: 1400px; margin: 0 auto; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px; }
+  .card h2 { font-size: 16px; color: #93c5fd; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .chat-log { min-height: 120px; }
+  .msg { margin-bottom: 10px; line-height: 1.5; }
+  .msg.user { color: #fbbf24; }
+  .msg.agent { color: #e2e8f0; }
+  .input-row { display: flex; gap: 10px; margin-top: 14px; }
+  .input-row input { flex: 1; background: #0f172a; border: 1px solid #475569; color: #f1f5f9; border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+  .input-row button { background: #7c3aed; color: #fff; border: 0; border-radius: 10px; padding: 12px 20px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .input-row button:hover { background: #6d28d9; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { background: #0f172a; border: 1px solid #475569; color: #cbd5e1; border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .chip:hover { border-color: #7c3aed; color: #fff; }
+  .trace { font-size: 13.5px; }
+  .trace-step { border-left: 3px solid #7c3aed; padding: 8px 12px; margin-bottom: 10px; background: #0f172a; border-radius: 0 8px 8px 0; }
+  .trace-step b { color: #fbbf24; }
+  .trace-step .src { color: #64748b; font-size: 11px; }
+  .trace-step .ms { float: right; color: #64748b; font-size: 11px; }
+  .rec { border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #0f172a; }
+  .rec.top { border-color: #f59e0b; background: #1c1917; }
+  .rec h3 { font-size: 16px; }
+  .rec .price { color: #4ade80; font-weight: 700; font-size: 18px; }
+  .rec .mrp { color: #94a3b8; text-decoration: line-through; font-size: 13px; margin-left: 6px; }
+  .rec .rating { color: #fbbf24; font-size: 13px; }
+  .rec .why { font-size: 13px; color: #cbd5e1; margin-top: 8px; line-height: 1.5; }
+  .rec .why li { margin-left: 16px; }
+  .rec .score { float: right; background: #7c3aed; color: #fff; border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 700; }
+  .rec button { margin-top: 10px; background: #059669; color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; }
+  .rec button:hover { background: #047857; }
+  .flag { color: #f87171; font-size: 12px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+  th, td { border: 1px solid #334155; padding: 9px 10px; text-align: left; }
+  th { background: #0f172a; color: #93c5fd; }
+  .wide { grid-column: 1 / -1; }
+  .order { background: #052e16; border: 1px solid #16a34a; border-radius: 12px; padding: 16px; margin-top: 12px; display: none; }
+  .order b { color: #4ade80; }
+  .hint { color: #94a3b8; font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SAUDA <span>· Anticipatory Shopping Agent</span><span class="sim">DEMO STORE — SIMULATED</span></h1>
+  <p>Techfest AgentX 2026 · IIT Bombay · Challenge 1: Anticipatory Commerce · Rezolve Labs integrated</p>
+</header>
+<main>
+  <section class="card">
+    <h2>💬 Ask Sauda</h2>
+    <div class="chat-log" id="chatLog">
+      <div class="msg agent">Namaste! I am <b>Sauda</b>. Tell me what you need — even if your request is incomplete. I will figure out the rest. Try: <i>“gift for mom under 2000”</i> or <i>“phone under 15000 with good camera”</i>.</div>
+    </div>
+    <div class="input-row">
+      <input id="q" type="text" placeholder="e.g. gift for mom under 2000" autocomplete="off">
+      <button onclick="ask()">Ask Sauda →</button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="quick(this)">gift for mom under 2000</span>
+      <span class="chip" onclick="quick(this)">phone under 15000 with good camera</span>
+      <span class="chip" onclick="quick(this)">laptop for coding under 55000</span>
+      <span class="chip" onclick="quick(this)">something for my room</span>
+      <span class="chip" onclick="quick(this)">running shoes for gym</span>
+    </div>
+    <div class="hint" id="clarify"></div>
+    <div class="order" id="orderBox"></div>
+  </section>
+
+  <section class="card">
+    <h2>🧠 Agent trace — what Sauda did</h2>
+    <div class="trace" id="trace"><div class="msg agent">Run a request to see the agent think: understand → anticipate → discover → rank → govern → recommend.</div></div>
+  </section>
+
+  <section class="card wide" id="recSection">
+    <h2>⭐ Recommendations — why each fits</h2>
+    <div id="recs"><div class="msg agent">No recommendations yet. Ask Sauda something.</div></div>
+  </section>
+
+  <section class="card wide" id="cmpSection">
+    <h2>⚖️ Compare — top 3 side by side</h2>
+    <div id="cmp"><div class="msg agent">The comparison table appears after a request.</div></div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function quick(el){ $('q').value = el.textContent; ask(); }
+async function ask(){
+  const q = $('q').value.trim();
+  if(!q) return;
+  $('chatLog').innerHTML += `<div class="msg user">You: ${esc(q)}</div>`;
+  $('trace').innerHTML = '<div class="msg agent">Sauda is thinking…</div>';
+  $('recs').innerHTML = '<div class="msg agent">Searching…</div>';
+  const res = await fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message: q})});
+  const d = await res.json();
+  render(d);
+}
+function render(d){
+  $('chatLog').innerHTML += `<div class="msg agent">Sauda: I understood — <b>${esc(d.intent.category || 'category not stated')}</b>${d.intent.budget ? ` · budget ₹${d.intent.budget.toLocaleString('en-IN')}` : ''}${d.intent.recipient ? ` · for ${esc(d.intent.recipient)}` : ''}. I inferred what you did not say and picked <b>${d.primary ? esc(d.primary.product.name) : 'nothing'}</b> as the best fit.</div>`;
+  $('trace').innerHTML = d.trace.map(t => `<div class="trace-step"><span class="ms">${t.ms} ms</span><b>${t.step}. ${esc(t.title)}</b> <span class="src">[${esc(t.source)}]</span><br>${esc(t.detail)}</div>`).join('') + `<div class="trace-step"><b>Total</b> · ${d.total_ms} ms end to end</div>`;
+  $('clarify').innerHTML = d.clarifying_question ? `⚠️ ${esc(d.clarifying_question)}` : '';
+  $('recs').innerHTML = d.recommendations.map((r,i) => `
+    <div class="rec ${i===0?'top':''}">
+      <span class="score">${r.score} / 100</span>
+      <h3>${i===0?'🏆 ':''}${esc(r.product.name)}</h3>
+      <div><span class="price">₹${r.product.price.toLocaleString('en-IN')}</span><span class="mrp">₹${r.product.mrp.toLocaleString('en-IN')}</span> <span class="rating">★ ${r.product.rating} (${r.product.reviews.toLocaleString('en-IN')} reviews)</span> ${r.over_budget?'<span class="flag">OVER BUDGET — flagged</span>':''} ${!r.in_stock?'<span class="flag">OUT OF STOCK</span>':''}</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px">${esc(r.product.desc)}</div>
+      <ul class="why">${r.reasons.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">Score: attribute fit ${r.breakdown.attribute_fit} · value ${r.breakdown.value} · budget fit ${r.breakdown.budget_fit} · preference fit ${r.breakdown.preference_fit}</div>
+      <button onclick="buy('${r.product.id}','${esc(r.product.name)}',${r.product.price})">Buy now (simulated) →</button>
+    </div>`).join('');
+  $('cmp').innerHTML = `<table><tr><th>Product</th><th>Price</th><th>Rating</th><th>Key specs</th><th>Score</th></tr>` +
+    d.comparison.map(c => `<tr><td>${esc(c.name)}</td><td>₹${c.price.toLocaleString('en-IN')}</td><td>★ ${c.rating}</td><td>${esc(c.key_spec)}</td><td><b>${c.score}</b></td></tr>`).join('') + `</table>`;
+}
+async function buy(id, name, price){
+  const res = await fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({product_id: id, qty: 1})});
+  const o = await res.json();
+  $('orderBox').style.display = 'block';
+  $('orderBox').innerHTML = `<b>✓ Order confirmed (SIMULATED)</b><br>Order ID: <b>${o.order_id}</b> · ${esc(name)} · ₹${price.toLocaleString('en-IN')}<br>Payment: ${esc(o.payment_method)} · Status: ${esc(o.status)}<br><span style="color:#94a3b8;font-size:12px">${esc(o.note)}</span>`;
+  $('orderBox').scrollIntoView({behavior:'smooth', block:'center'});
+}
+// Demo scenes: ?demo=1&scene=N&q=... — deterministic states for screenshots.
+const params = new URLSearchParams(location.search);
+if (params.get('demo') === '1') {
+  const q = params.get('q') || 'gift for mom under 2000';
+  const scene = params.get('scene') || '3';
+  $('q').value = q;
+  if (scene === '1') { /* landing + typed query only */ }
+  else { ask(); if (scene === '2') { $('recSection').classList.add('hidden'); $('cmpSection').classList.add('hidden'); } }
+  if (scene === '3') { $('cmpSection').classList.add('hidden'); }
+  if (scene === '4') { /* full view */ }
+  if (scene === '5') { setTimeout(()=>{ const b = document.querySelector('.rec button'); if (b) b.click(); }, 1200); }
+}
+</script>
+</body>
+</html>
