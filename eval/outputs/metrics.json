@@ -1,10 +1,1 @@
-{
-  "n_requests": 40,
-  "n_scored": 39,
-  "category_accuracy": 0.974,
-  "budget_compliance": 1.0,
-  "top1_accuracy": 1.0,
-  "top3_hit_rate": 1.0,
-  "avg_latency_ms": 5.7,
-  "max_latency_ms": 25.6
-}
+{"official_dev":{"accuracy":1.0,"accuracy_by_tag":{"code_mixed":1.0,"correction":1.0,"late_constraint":1.0,"plain":1.0},"agent":"app/official_agent.py","baseline_accuracy":0.527,"baseline_score":20.0,"date":"2026-11-25","description":"Official Techfest Challenge 1 dev set (official-dev-set/ps1-anticipatory-commerce/dev.jsonl, 300 streaming requests on the 1,074-product official catalogue). Scored with the official evaluate.py: score = (0.4 + 0.6 x earliness if final right else 0) - 1.0 x wrong commits - 0.02 x wasted searches (mean x 100). Agent: app/official_agent.py, run 2026-11-25. Per-request log: eval/outputs/official_results.jsonl.","early_share":0.0053,"early_words_mean":0.087,"filter_recovery_at_last_word":{"brand":1.0,"category":1.0,"colour":1.0,"exact_all_5":1.0,"max_price":1.0,"size":1.0},"latency_ms_per_word":0.45,"latency_p95_ms_per_word":0.67,"n_requests":300,"oracle_early_share":0.1629,"requests_with_wrong_commit":0,"score":40.32,"searches_per_request":1.0,"tag_counts":{"code_mixed":25,"correction":55,"late_constraint":50,"plain":177},"wasted_searches_per_request":0.0,"wrong_commits":0},"self_made_devset":{"avg_latency_ms":5.7,"budget_compliance":1.0,"category_accuracy":0.974,"description":"Original 40-request dev set on the 100-product demo catalogue (data/devset.json, eval/run_eval.py). Full-text requests; metrics are category / budget / top-1 / top-3 / latency.","max_latency_ms":25.6,"n_requests":40,"n_scored":39,"top1_accuracy":1.0,"top3_hit_rate":1.0}}

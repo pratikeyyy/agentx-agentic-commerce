@@ -145,10 +145,21 @@ _HINDI_NUMBER_WORDS = "|".join(sorted(HINDI_ONES, key=len, reverse=True))
 
 
 def _norm_text(words: list[str]) -> str:
-    """Lowercase words, strip edge punctuation, split hyphens."""
+    """Lowercase words, strip edge punctuation, split hyphens.
+
+    A trailing "." after a letter becomes its own " ." token, so a price
+    amount never swallows the next sentence's number word ("four thousand
+    five hundred. one more thing" is 4500, not 4501). Decimals ("0.8k")
+    and digit-ending periods ("1,500.") are unaffected.
+    """
     cleaned = []
     for w in words:
-        w = w.lower().replace("-", " ").strip(".,!?;:\"'()[]")
+        w = w.lower().replace("-", " ")
+        # "Rs." is an abbreviation, not a sentence end — just strip it.
+        if re.search(r"[a-z]\.$", w) and w[:-1] not in ("rs",):
+            w = w[:-1] + " ."
+        else:
+            w = w.strip(".,!?;:\"'()[]")
         cleaned.append(w)
     return " ".join(cleaned).strip()
 
@@ -246,9 +257,12 @@ def _last_price(text: str) -> int | None:
             r"(saadhe\s+)?(" + hindi_words + r")\s+(sau|hazaar)\b", text):
         cands.append((m.end(), _parse_hindi_number(
             m.group(2), m.group(3), bool(m.group(1)))))
-    # "2000 tak" (up to 2000).
-    for m in re.finditer(r"([\d,]+)\s+tak\b", text):
+    # "2000 tak" (up to 2000) / "1700 se kam" (less than 1700).
+    for m in re.finditer(r"([\d,]+)\s+(?:tak|se\s+kam)\b", text):
         cands.append((m.end(), int(m.group(1).replace(",", ""))))
+    # "dhai hazaar/sau" — dhai = two and a half (2500 / 250).
+    for m in re.finditer(r"\bdhai\s+(sau|hazaar)\b", text):
+        cands.append((m.end(), 2500 if m.group(1) == "hazaar" else 250))
 
     good = [(pos, v) for pos, v in cands if 100 <= v <= 50000]
     if not good:
@@ -265,6 +279,8 @@ def _size_from_token(tok: str) -> str | None:
         return tok.upper()
     if tok in ONES:
         return str(ONES[tok])
+    if tok in HINDI_ONES:
+        return str(HINDI_ONES[tok])
     if tok.isdigit():
         return tok
     return None
@@ -309,6 +325,18 @@ def _last_size(text: str, category: str | None) -> str | None:
     for i, tok in enumerate(text.split()):
         if tok in ("s", "m", "l", "xs", "xl", "xxl"):
             cands.append((len(" ".join(text.split()[: i + 1])), tok.upper()))
+    # A bare number word directly before a category phrase is a size
+    # ("actually six slides" = size 6; "size seven floaters" is caught
+    # above, but the bare form is not).
+    for m in re.finditer(r"\b(" + _SIZE_NUMBER_WORDS + r")\s+(?:" +
+                         _CATEGORY_RE + r")\b", text):
+        cands.append((m.end(), _size_from_token(m.group(1))))
+    # A number word (Hindi or English) + "number" is a size ("das number"
+    # = size 10; "ten number" the same).
+    for m in re.finditer(r"\b(?:" + _HINDI_NUMBER_WORDS + r"|"
+                         r"one|two|three|four|five|six|seven|eight|nine|ten"
+                         r"|eleven)\s+number\b", text):
+        cands.append((m.end(), _size_from_token(m.group(0).split()[0])))
     if not cands:
         return None
     cands.sort()
