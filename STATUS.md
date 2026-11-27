@@ -27,6 +27,28 @@
 - **Gold filters pin exactly ONE product in all 300 requests**; the target is top-1 of a gold-filter search in 300/300.
 - **Rezolve is still a stub (`rezolve:stub`)** — the coupon was NOT found anywhere (dashboard, Problem Statement PDF, Gmail incl. spam/promotions); most likely inside the official WhatsApp group. Do NOT set a live key, do NOT pay.
 
+## Deploy — Render free tier (27 Nov 2026, ~12:35 IST)
+
+- **Repo:** https://github.com/pratikeyyy/agentx-agentic-commerce — public, main branch.
+  (Correction to the note above: the repo WAS created 25 Nov 2026; commit
+  `05829f9a` was live before this deploy work.)
+- **Deploy-ready, pushed 27 Nov:** commit `e5e58586bfe0338da82a4b4aaea649774eab8716` —
+  `render.yaml` (Blueprint: free web service, `pip install -r requirements.txt`,
+  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, health check `/api/health`),
+  `requirements.txt` (fastapi 0.165.0, uvicorn 0.54.0, pydantic 2.14.4),
+  `runtime.txt` (python-3.12.0), README deploy section. No code changes needed:
+  the app already binds 0.0.0.0 via the uvicorn command and reads `$PORT`.
+- **Local verification 27 Nov:** tests 22/22 pass; server on 0.0.0.0:8321 —
+  `/api/health` ok (100 products, `rezolve:stub`), `/api/chat` "gift for mom
+  under 2000" → top pick Libas saree ₹1,499, UI 200, simulated checkout
+  `SAU-931175` confirmed.
+- **BLOCKER — needs a browser (Render dashboard):** there is no Render API
+  key/connector available to this agent, and Render deploys require connecting
+  the repo in the dashboard: Render → New → Blueprint → connect
+  `pratikeyyy/agentx-agentic-commerce` → Apply. Free tier, no card needed.
+  Caveat: free web services sleep after ~15 min idle (cold start on first hit).
+- **Rezolve still a stub** — coupon never found; unchanged, do not retry.
+
 ## BLOCKED — needs the user (do NOT retry without it)
 
 **GitHub repo creation (`pratikeyyy/agentx-agentic-commerce`) did NOT happen.**
