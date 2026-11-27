@@ -1,0 +1,12 @@
+Sauda — AgentX Round 1 (Techfest IIT Bombay)
+Challenge 1: Anticipatory Commerce
+
+GitHub repository:
+https://github.com/pratikeyyy/agentx-agentic-commerce
+
+Team: Sauda (solo — Pratik Kumar, Leader)
+Team ID: TM-8C55C8C8587
+Competition ID: AX-70D099404455
+Techfest ID: TF-90635
+
+Official dev-set eval: 40.32 vs baseline 20.0 (accuracy 300/300, 0 wrong commits)

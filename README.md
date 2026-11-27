@@ -62,6 +62,13 @@ python3 -m venv venv && ./venv/bin/pip install fastapi uvicorn
 API: `GET /api/health` · `POST /api/chat {"message": "..."}` ·
 `POST /api/checkout {"product_id": "P051", "qty": 1}` · `GET /api/products`.
 
+## Deploy (Render, free tier)
+
+`render.yaml` is a Render Blueprint: free web service, `pip install -r
+requirements.txt`, then `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+In the Render dashboard: New → Blueprint → connect this repo → Apply.
+No env vars or card needed. Health check: `GET /api/health`.
+
 Demo scenes (for the video): `/?demo=1&scene=N&q=...` — scene 1 landing,
 2 trace, 3 recommendations, 4 comparison, 5 checkout.
 
